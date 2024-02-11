@@ -21,7 +21,6 @@ export const createNewUser = async (req, res, next) => {
   try {
     const newUser = await createNewUserRepo(req.body);
     await sendToken(newUser, res, 200);
-
     // Implement sendWelcomeEmail function to send welcome message
     await sendWelcomeEmail(newUser);
   } catch (err) {

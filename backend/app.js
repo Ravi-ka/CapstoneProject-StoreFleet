@@ -10,13 +10,17 @@ import userRoutes from "./src/user/routes/user.routes.js";
 import cookieParser from "cookie-parser";
 import orderRoutes from "./src/order/routes/order.routes.js";
 
-const configPath = path.resolve("backend", "config", "uat.env");
+const configPath = path.resolve("config", "uat.env");
 dotenv.config({ path: configPath });
 
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
+// Default path
+app.get("/", (req, res) => {
+  res.status(200).send(`<center><h1>Welcome</h1></center>`);
+});
 // configure routes
 app.use("/api/storefleet/product", productRoutes);
 app.use("/api/storefleet/user", userRoutes);
