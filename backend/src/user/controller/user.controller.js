@@ -25,7 +25,9 @@ export const createNewUser = async (req, res, next) => {
     await sendWelcomeEmail(newUser);
   } catch (err) {
     //  handle error for duplicate email
-    return next(new ErrorHandler(400, err));
+    if (err.code === 11000) {
+      return next(new ErrorHandler(400, "Email already registered"));
+    } else return next(new ErrorHandler(400, err));
   }
 };
 
