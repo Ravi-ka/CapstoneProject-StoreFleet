@@ -2,18 +2,19 @@
 import nodemailer from "nodemailer";
 
 export const sendWelcomeEmail = async (user) => {
-  const transporter = nodemailer.createTransport({
-    service: process.env.SMPT_SERVICE,
-    auth: {
-      user: process.env.STORFLEET_SMPT_MAIL,
-      pass: process.env.STORFLEET_SMPT_MAIL_PASSWORD,
-    },
-  });
-  const mailOptions = {
-    from: process.env.STORFLEET_SMPT_MAIL,
-    to: "ka.ravisankar@gmail.com",
-    subject: "Welcome to StoreFleet",
-    html: `
+  try {
+    const transporter = nodemailer.createTransport({
+      service: process.env.SMPT_SERVICE,
+      auth: {
+        user: process.env.STORFLEET_SMPT_MAIL,
+        pass: process.env.STORFLEET_SMPT_MAIL_PASSWORD,
+      },
+    });
+    const mailOptions = {
+      from: process.env.STORFLEET_SMPT_MAIL,
+      to: user.email,
+      subject: "Welcome to StoreFleet",
+      html: `
     <div style="display:flex;justify-content:center;align-item:center">
     <img src="https://files.codingninjas.in/logo1-32230.png?_ga=2.34662757.598281949.1707544318-1301688177.1702552570">
     </div>
@@ -26,12 +27,18 @@ export const sendWelcomeEmail = async (user) => {
 </button>
     </center>
     `,
-  };
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      return console.log(error);
-    } else {
-      console.log("Message Sent : %s", info.messageId);
-    }
-  });
+    };
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        return console.log(error);
+      } else {
+        console.log(
+          `Welcome email sent to ${user.email} and messageId : ` +
+            info.messageId
+        );
+      }
+    });
+  } catch (error) {
+    console.log("Error occurred while sending welcome email :" + error);
+  }
 };

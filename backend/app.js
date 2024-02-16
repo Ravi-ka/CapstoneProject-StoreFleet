@@ -19,7 +19,7 @@ app.use(cookieParser());
 
 // Default path
 app.get("/", (req, res) => {
-  res.status(200).send(`<center><h1>Welcome</h1></center>`);
+  res.status(200).send(`<center><h1>Welcome to Storefleet</h1></center>`);
 });
 // configure routes
 app.use("/api/storefleet/product", productRoutes);
