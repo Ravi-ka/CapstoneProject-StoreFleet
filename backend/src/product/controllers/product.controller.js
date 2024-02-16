@@ -10,7 +10,7 @@ import {
   getProductDetailsRepo,
   getTotalCountsOfProduct,
   updateProductRepo,
-  findProductByKeyword,
+  findProductByFilter,
 } from "../model/product.repository.js";
 import ProductModel from "../model/product.schema.js";
 
@@ -32,11 +32,29 @@ export const addNewProduct = async (req, res, next) => {
 
 export const getAllProducts = async (req, res, next) => {
   // Implement the functionality for search, filter and pagination this function
-  // Search functionality
-  const keyword = req.query.keyword;
+  const { keyword, category, maxPrice, minPrice } = req.query;
   const page = req.query.page || 1;
   const pageLimit = 3;
-  const matchedProducts = await findProductByKeyword(keyword, page, pageLimit);
+
+  // filter Query
+  const filterQuery = {};
+  if (category) {
+    filterQuery.category = category;
+  }
+  if (minPrice && maxPrice) {
+    filterQuery.price = { $gte: minPrice, $lte: maxPrice };
+  } else if (minPrice) {
+    filterQuery.price = { $gte: minPrice };
+  } else if (maxPrice) {
+    filterQuery.price = { $lte: maxPrice };
+  }
+  // search query
+  let matchedProducts;
+  if (keyword) {
+    matchedProducts = await findProductByFilter(keyword, page, pageLimit);
+  } else {
+    matchedProducts = await findProductByFilter(filterQuery, page, pageLimit);
+  }
 
   if (!matchedProducts) {
     return res

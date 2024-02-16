@@ -33,11 +33,12 @@ export const findProductRepo = async (productId) => {
 };
 
 // This function is responsible for the keyword search and pagination limit
-export const findProductByKeyword = async (keyword, page, pageLimit) => {
+export const findProductByFilter = async (keyword, page, pageLimit) => {
   const products = await ProductModel.find({
     $or: [{ name: { $regex: keyword, $options: "i" } }],
   })
     .skip((page - 1) * pageLimit)
     .limit(pageLimit);
+  console.log(products);
   return products;
 };
