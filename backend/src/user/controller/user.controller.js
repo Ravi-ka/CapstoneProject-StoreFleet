@@ -1,5 +1,6 @@
 // Please don't change the pre-written code
 // Import the necessary modules here
+import { ObjectId } from "mongoose";
 
 import { sendPasswordResetEmail } from "../../../utils/emails/passwordReset.js";
 import { sendWelcomeEmail } from "../../../utils/emails/welcomeMail.js";
@@ -78,12 +79,10 @@ export const forgetPassword = async (req, res, next) => {
   const resetToken = await user.getResetPasswordToken();
   console.log(resetToken);
   await sendPasswordResetEmail(user, resetToken);
-  return res
-    .status(200)
-    .json({
-      status: "success",
-      message: `Reset password mail has been sent to ${user.email}`,
-    });
+  return res.status(200).json({
+    status: "success",
+    message: `Reset password mail has been sent to ${user.email}`,
+  });
 };
 
 export const resetUserPassword = async (req, res, next) => {
@@ -181,5 +180,35 @@ export const deleteUser = async (req, res, next) => {
 };
 
 export const updateUserProfileAndRole = async (req, res, next) => {
-  // Write your code here for updating the roles of other users by admin
+  try {
+    //const { id } = req.params.id;
+    const { name, email, role } = req.body;
+    console.log(req.params.id);
+    //console.log(req.body);
+
+    const user = await findUserRepo({ _id: req.params.id }, true);
+    console.log(user);
+    if (!user) {
+      return next(
+        new ErrorHandler(404, "User not found. Please enter a valid user ID")
+      );
+    }
+    const userUpdate = await updateUserRoleAndProfileRepo(
+      { _id: req.params.id },
+      req.body
+    );
+    if (!userUpdate) {
+      return next(new ErrorHandler(500, error));
+    } else {
+      return res
+        .status(200)
+        .json({
+          status: "Success",
+          result: "Updated user details",
+          response: userUpdate,
+        });
+    }
+  } catch (error) {
+    return next(new ErrorHandler(500, error));
+  }
 };
