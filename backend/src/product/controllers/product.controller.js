@@ -34,13 +34,9 @@ export const getAllProducts = async (req, res, next) => {
   // Implement the functionality for search, filter and pagination this function
   // Search functionality
   const keyword = req.query.keyword;
-  const page = req.query.page || 0;
+  const page = req.query.page || 1;
   const pageLimit = 3;
-  const matchedProducts = await findProductByKeyword(
-    { name: keyword },
-    page,
-    pageLimit
-  );
+  const matchedProducts = await findProductByKeyword(keyword, page, pageLimit);
 
   if (!matchedProducts) {
     return res
