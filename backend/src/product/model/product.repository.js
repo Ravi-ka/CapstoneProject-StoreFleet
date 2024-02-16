@@ -31,3 +31,10 @@ export const getTotalCountsOfProduct = async () => {
 export const findProductRepo = async (productId) => {
   return await ProductModel.findById(productId);
 };
+
+// This function is responsible for the keyword search and pagination limit
+export const findProductByKeyword = async (keyword, page, pageLimit) => {
+  return await ProductModel.find(keyword)
+    .skip((page - 1) * pageLimit)
+    .limit(pageLimit);
+};

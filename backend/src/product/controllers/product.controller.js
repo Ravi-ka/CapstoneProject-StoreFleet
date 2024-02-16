@@ -10,6 +10,7 @@ import {
   getProductDetailsRepo,
   getTotalCountsOfProduct,
   updateProductRepo,
+  findProductByKeyword,
 } from "../model/product.repository.js";
 import ProductModel from "../model/product.schema.js";
 
@@ -22,7 +23,7 @@ export const addNewProduct = async (req, res, next) => {
     if (product) {
       res.status(201).json({ success: true, product });
     } else {
-      return next(new ErrorHandler(400, "some error occured!"));
+      return next(new ErrorHandler(400, "some error occurred!"));
     }
   } catch (error) {
     return next(new ErrorHandler(400, error));
@@ -30,7 +31,23 @@ export const addNewProduct = async (req, res, next) => {
 };
 
 export const getAllProducts = async (req, res, next) => {
-  // Implement the functionality for search, filter and pagination this function.
+  // Implement the functionality for search, filter and pagination this function
+  // Search functionality
+  const keyword = req.query.keyword;
+  const page = req.query.page || 0;
+  const pageLimit = 3;
+  const matchedProducts = await findProductByKeyword(
+    { name: keyword },
+    page,
+    pageLimit
+  );
+
+  if (!matchedProducts) {
+    return res
+      .status(404)
+      .json({ status: "failed", response: "No products found" });
+  }
+  return res.status(200).json({ status: "success", response: matchedProducts });
 };
 
 export const updateProduct = async (req, res, next) => {
