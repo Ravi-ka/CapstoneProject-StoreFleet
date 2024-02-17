@@ -25,7 +25,7 @@ export const createNewOrder = async (req, res, next) => {
     }
     // Check the stock
     if (verifyProduct.stock >= getProducts.quantity) {
-      req.body.user = req.user;
+      req.body.user = req.user; //added user details to the req.body
       // place the order
       const newOrder = await createNewOrderRepo(req.body);
       res.status(201).json({

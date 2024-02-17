@@ -48,9 +48,13 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.pre("save", async function (next) {
-  //  hash user password before saving using bcrypt
-  this.password = await bcrypt.hash(this.password, 12);
-  next();
+  try {
+    //  hash user password before saving using bcrypt
+    this.password = await bcrypt.hash(this.password, 12);
+    next();
+  } catch (error) {
+    console.log("hash error: " + error);
+  }
 });
 
 // JWT Token
@@ -75,7 +79,8 @@ userSchema.methods.getResetPasswordToken = async function () {
     .digest("hex");
 
   this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
-
+  console.log(this.resetPasswordToken);
+  console.log(this.resetPasswordExpire);
   return resetToken;
 };
 

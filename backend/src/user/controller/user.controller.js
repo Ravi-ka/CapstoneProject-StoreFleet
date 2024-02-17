@@ -1,6 +1,7 @@
 // Please don't change the pre-written code
 // Import the necessary modules here
 import { ObjectId } from "mongoose";
+import crypto from "crypto";
 
 import { sendPasswordResetEmail } from "../../../utils/emails/passwordReset.js";
 import { sendWelcomeEmail } from "../../../utils/emails/welcomeMail.js";
@@ -15,7 +16,6 @@ import {
   updateUserProfileRepo,
   updateUserRoleAndProfileRepo,
 } from "../models/user.repository.js";
-import crypto from "crypto";
 
 export const createNewUser = async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -77,7 +77,6 @@ export const forgetPassword = async (req, res, next) => {
     );
   }
   const resetToken = await user.getResetPasswordToken();
-  console.log(resetToken);
   await sendPasswordResetEmail(user, resetToken);
   return res.status(200).json({
     status: "success",
@@ -86,7 +85,39 @@ export const forgetPassword = async (req, res, next) => {
 };
 
 export const resetUserPassword = async (req, res, next) => {
-  // Implement feature for reset password
+  try {
+    const resetToken = req.params.token;
+    const { password, confirmPassword } = req.body;
+    if (!resetToken) {
+      return next(
+        new ErrorHandler(400, "Please provide the token to reset the password")
+      );
+    }
+    if (!password || !confirmPassword) {
+      return next(new ErrorHandler(400, "Please provide the password"));
+    }
+    if (password !== confirmPassword) {
+      return next(new ErrorHandler(400, "The password is not matching"));
+    }
+    const hashToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+    const user = await findUserForPasswordResetRepo(hashToken);
+    if (!user) {
+      return next(new ErrorHandler(400, "Invalid or expired reset token"));
+    }
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+    res.status(200).json({
+      success: true,
+      message: "Password reset successful",
+    });
+  } catch (error) {
+    return next(new ErrorHandler(500, "Internal server error"));
+  }
 };
 
 export const getUserDetails = async (req, res, next) => {
@@ -183,11 +214,8 @@ export const updateUserProfileAndRole = async (req, res, next) => {
   try {
     //const { id } = req.params.id;
     const { name, email, role } = req.body;
-    console.log(req.params.id);
-    //console.log(req.body);
 
     const user = await findUserRepo({ _id: req.params.id }, true);
-    console.log(user);
     if (!user) {
       return next(
         new ErrorHandler(404, "User not found. Please enter a valid user ID")
@@ -200,13 +228,11 @@ export const updateUserProfileAndRole = async (req, res, next) => {
     if (!userUpdate) {
       return next(new ErrorHandler(500, error));
     } else {
-      return res
-        .status(200)
-        .json({
-          status: "Success",
-          result: "Updated user details",
-          response: userUpdate,
-        });
+      return res.status(200).json({
+        status: "Success",
+        result: "Updated user details",
+        response: userUpdate,
+      });
     }
   } catch (error) {
     return next(new ErrorHandler(500, error));
