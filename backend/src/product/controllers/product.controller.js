@@ -161,6 +161,8 @@ export const deleteReview = async (req, res, next) => {
   // Insert the essential code into this controller wherever necessary to resolve issues related to removing reviews and updating product ratings.
   try {
     const { productId, reviewId } = req.query;
+    const userID = req.user._id.toString();
+
     if (!productId || !reviewId) {
       return next(
         new ErrorHandler(
@@ -176,7 +178,7 @@ export const deleteReview = async (req, res, next) => {
     const reviews = product.reviews;
 
     const isReviewExistIndex = reviews.findIndex((rev) => {
-      return rev._id.toString() === reviewId.toString();
+      return rev._id.toString() === reviewId.toString() && rev.user === userID;
     });
     if (isReviewExistIndex < 0) {
       return next(new ErrorHandler(400, "review doesn't exist"));
