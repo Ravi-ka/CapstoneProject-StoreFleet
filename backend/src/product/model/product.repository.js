@@ -1,3 +1,4 @@
+import { ErrorHandler } from "../../../utils/errorHandler.js";
 import ProductModel from "./product.schema.js";
 
 export const addNewProductRepo = async (product) => {
@@ -39,6 +40,17 @@ export const findProductByFilter = async (keyword, page, pageLimit) => {
   })
     .skip((page - 1) * pageLimit)
     .limit(pageLimit);
-  console.log(products);
   return products;
+};
+
+// Reduce the stock after placing the order
+export const reduceStockRepo = async (productID, orderQty) => {
+  try {
+    const reduceQty = await findProductRepo(productID);
+    reduceQty.stock -= orderQty;
+    reduceQty.save();
+    return;
+  } catch (error) {
+    return new ErrorHandler(500, "Something went wrong with database");
+  }
 };
